@@ -1,0 +1,74 @@
+version: '3'
+services:
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.2.0
+    volumes:
+      - /home/hung/Documents/webroot/practice/docker-elastic-7.2/kibana.yml:/usr/share/kibana/config/kibana.yml
+    ports:
+      - 5601:5601
+    networks:
+      - esnet
+  es01:
+    build: source
+    container_name: es01
+    environment:
+      - cluster.name=docker-cluster
+      - cluster.initial_master_nodes=es01,es02
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - http.cors.enabled=true
+      - http.cors.allow-origin=*
+      - node.name=es01
+      - discovery.seed_hosts=es02
+      - bootstrap.memory_lock=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - /home/hung/Documents/webroot/practice/docker-elastic-7.2/esdata01:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - esnet
+  es02:
+    build: source
+    container_name: es02
+    environment:
+      - cluster.name=docker-cluster
+      - cluster.initial_master_nodes=es01,es02
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - http.cors.enabled=true
+      - http.cors.allow-origin=*
+      - node.name=es02
+      - discovery.seed_hosts=es01
+      - bootstrap.memory_lock=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - /home/hung/Documents/webroot/practice/docker-elastic-7.2/esdata02:/usr/share/elasticsearch/data
+    networks:
+      - esnet
+
+  headPlugin:
+    image: 'mobz/elasticsearch-head:5'
+    container_name: head_es
+    ports:
+      - '9100:9100'
+    networks:
+      - esnet
+volumes:
+  esdata01:
+    driver: local
+  esdata02:
+    driver: local
+
+networks:
+  esnet:

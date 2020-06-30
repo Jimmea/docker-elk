@@ -1,0 +1,6 @@
+elasticsearch.hosts:
+  - http://es01:9200
+  - http://es02:9200
+server.name: "[kibana7x.com]"
+server.port: 5601
+server.host: "0.0.0.0"
