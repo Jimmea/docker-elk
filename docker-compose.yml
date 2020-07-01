@@ -1,25 +1,32 @@
 version: '3'
 services:
+  # Kibana
   kibana:
     image: docker.elastic.co/kibana/kibana:7.2.0
     volumes:
-      - /home/hung/Documents/webroot/practice/docker-elastic-7.2/kibana.yml:/usr/share/kibana/config/kibana.yml
+      - ./services/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
+      - /data_host/kibana/log:/var/log/kibana
     ports:
       - 5601:5601
     networks:
       - esnet
+
+  # ES01
   es01:
-    build: source
-    container_name: es01
+    build:
+      context: ./services/elasticsearch
+      dockerfile: Dockerfile
     environment:
       - cluster.name=docker-cluster
-      - cluster.initial_master_nodes=es01,es02
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - cluster.initial_master_nodes=es01,es02,es03
       - http.cors.enabled=true
       - http.cors.allow-origin=*
       - node.name=es01
-      - discovery.seed_hosts=es02
+      - discovery.seed_hosts=es02,es03
       - bootstrap.memory_lock=true
+      - "ELASTIC_USERNAME=elastic"
+      - "ELASTIC_PASSWORD=elastic"
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ulimits:
       memlock:
         soft: -1
@@ -28,23 +35,27 @@ services:
         soft: 65536
         hard: 65536
     volumes:
-      - /home/hung/Documents/webroot/practice/docker-elastic-7.2/esdata01:/usr/share/elasticsearch/data
+      - /data_host/esdata01:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
     networks:
       - esnet
+  # ES02
   es02:
-    build: source
-    container_name: es02
+    build:
+      context: ./services/elasticsearch
+      dockerfile: Dockerfile
     environment:
       - cluster.name=docker-cluster
-      - cluster.initial_master_nodes=es01,es02
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - cluster.initial_master_nodes=es01,es02,es03
       - http.cors.enabled=true
       - http.cors.allow-origin=*
       - node.name=es02
-      - discovery.seed_hosts=es01
+      - discovery.seed_hosts=es01,es03
       - bootstrap.memory_lock=true
+      - "ELASTIC_USERNAME=elastic"
+      - "ELASTIC_PASSWORD=elastic"
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ulimits:
       memlock:
         soft: -1
@@ -53,17 +64,66 @@ services:
         soft: 65536
         hard: 65536
     volumes:
-      - /home/hung/Documents/webroot/practice/docker-elastic-7.2/esdata02:/usr/share/elasticsearch/data
+      - /data_host/esdata02:/usr/share/elasticsearch/data
+    ports:
+      - 9201:9200
     networks:
       - esnet
 
-  headPlugin:
-    image: 'mobz/elasticsearch-head:5'
-    container_name: head_es
+  # ES03
+  es03:
+    build:
+      context: ./services/elasticsearch
+      dockerfile: Dockerfile
+    environment:
+      - cluster.name=docker-cluster
+      - cluster.initial_master_nodes=es01,es02,es03
+      - http.cors.enabled=true
+      - http.cors.allow-origin=*
+      - node.name=es03
+      - discovery.seed_hosts=es01,es02
+      - bootstrap.memory_lock=true
+      - "ELASTIC_USERNAME=elastic"
+      - "ELASTIC_PASSWORD=elastic"
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - /data_host/esdata03:/usr/share/elasticsearch/data
     ports:
-      - '9100:9100'
+      - 9202:9200
     networks:
       - esnet
+
+  # headPlugin
+  headPlugin:
+    image: 'mobz/elasticsearch-head:5'
+    ports:
+      - 9100:9100
+    networks:
+      - esnet
+
+  # Elasticsearch HQ
+  elasticsearchHq:
+    image: elastichq/elasticsearch-hq
+    ports:
+      - 5000:5000
+    networks:
+      - esnet
+
+  # Log stash
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.2.0
+    volumes:
+      - ./services/logstash/logstash.conf/:/usr/share/logstash/pipeline/logstash.conf
+    networks:
+      - esnet
+
 volumes:
   esdata01:
     driver: local
