@@ -3,7 +3,9 @@ services:
   # Kibana
   kibana:
     image: docker.elastic.co/kibana/kibana:${KIBANA_VERSION}
-    restart: 'always'
+    environment:
+      SERVER_NAME: kibana.local
+      ELASTICSEARCH_URL: http://es01:9200
     volumes:
       - ./bin/kibana/kibana${KIBANA_VERSION}/kibana.yml:/usr/share/kibana/config/kibana.yml
       - /data_host/kibana/log:/var/log/kibana
@@ -18,18 +20,13 @@ services:
       context: ./bin/elastic/elastic${ES_VERSION}
       dockerfile: Dockerfile
     image: elastic01:${ES_VERSION}
-    restart: 'always'
     environment:
       - cluster.name=docker-cluster
-      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - http.cors.enabled=true
       - http.cors.allow-origin=*
-      - node.name=es01
-      - discovery.seed_hosts=es02,es03
-      - bootstrap.memory_lock=true
-      - "ELASTIC_USERNAME=elastic"
-      - "ELASTIC_PASSWORD=elastic"
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - discovery.zen.minimum_master_nodes=2
     ulimits:
       memlock:
         soft: -1
@@ -38,7 +35,7 @@ services:
         soft: 65536
         hard: 65536
     volumes:
-      - /data_host/esdata01:/usr/share/elasticsearch/data
+      - /data_host6x/esdata1:/usr/share/elasticsearch/data
     ports:
       - ${ES_PORT}:9200
     networks:
@@ -50,18 +47,14 @@ services:
       context: ./bin/elastic/elastic${ES_VERSION}
       dockerfile: Dockerfile
     image: elastic02:${ES_VERSION}
-    restart: 'always'
     environment:
       - cluster.name=docker-cluster
-      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "discovery.zen.ping.unicast.hosts=es01"
       - http.cors.enabled=true
       - http.cors.allow-origin=*
-      - node.name=es02
-      - discovery.seed_hosts=es01,es03
-      - bootstrap.memory_lock=true
-      - "ELASTIC_USERNAME=elastic"
-      - "ELASTIC_PASSWORD=elastic"
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - discovery.zen.minimum_master_nodes=2
     ulimits:
       memlock:
         soft: -1
@@ -70,9 +63,7 @@ services:
         soft: 65536
         hard: 65536
     volumes:
-      - /data_host/esdata02:/usr/share/elasticsearch/data
-    ports:
-      - ${ES_PORT1}:9200
+      - /data_host6x/esdata2:/usr/share/elasticsearch/data
     networks:
       - esnet
 
@@ -82,18 +73,14 @@ services:
       context: ./bin/elastic/elastic${ES_VERSION}
       dockerfile: Dockerfile
     image: elastic03:${ES_VERSION}
-    restart: 'always'
     environment:
-      - cluster.name=docker-cluster
-      - cluster.initial_master_nodes=es01,es02,es03
-      - http.cors.enabled=true
-      - http.cors.allow-origin=*
-      - node.name=es03
-      - discovery.seed_hosts=es01,es02
-      - bootstrap.memory_lock=true
-      - "ELASTIC_USERNAME=elastic"
-      - "ELASTIC_PASSWORD=elastic"
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    - cluster.name=docker-cluster
+    - bootstrap.memory_lock=true
+    - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    - "discovery.zen.ping.unicast.hosts=es01"
+    - http.cors.enabled=true
+    - http.cors.allow-origin=*
+    - discovery.zen.minimum_master_nodes=2
     ulimits:
       memlock:
         soft: -1
@@ -102,24 +89,21 @@ services:
         soft: 65536
         hard: 65536
     volumes:
-      - /data_host/esdata03:/usr/share/elasticsearch/data
-    ports:
-      - ${ES_PORT2}:9200
+      - /data_host6x/esdata3:/usr/share/elasticsearch/data
     networks:
       - esnet
 
-  # headPlugin
-  headPlugin:
-    image: 'mobz/elasticsearch-head:5'
-    ports:
-      - 9100:9100
-    networks:
-      - esnet
-
+#  # headPlugin
+#  headPlugin:
+#    image: 'mobz/elasticsearch-head:5'
+#    ports:
+#      - 9100:9100
+#    networks:
+#      - esnet
+#
   # Elasticsearch HQ
   elasticsearchHq:
     image: elastichq/elasticsearch-hq
-    restart: 'always'
     ports:
       - ${ES_HQ}:5000
     networks:

@@ -10,22 +10,24 @@ By default, the stack exposes the following ports:
 - 9300: Elasticsearch TCP transport
 - 5601: Kibana
 - 5000: Elasticsearch HQ
-
+- file beat
 
 ## Setup
 
 ```sh
-$ git clone git@github.com:Jimmea/docker-elastic-7x.git /path_to_project
+> git clone git@github.com:Jimmea/docker-elastic-7x.git /path_to_project
 
-$ cd /path_to_project
+> cd /path_to_project
 
-$ docker-compose build
+# Run 6x
+> sh 6xrun.sh
 
-$ docker-compose up -d
+# Run 7x
+> sh 7xrun.sh
 
-$ docker-compose logs -f
+> docker-compose logs -f
 
-$ docker-compose down
+> docker-compose down
 ```
 
 **Note**: If you using Ubuntu/Linux, you may need to change the permissions of folder:
@@ -39,11 +41,19 @@ sudo chmod -R 777 /path_to_project/data
 docker cp [name_container]:/usr/share/elasticsearch/config/elasticsearch.yml source/elasticsearch.yml 
 ```
 
+## Upgrade or Down
+```
+    Update file .env for specify version
+    docker-compose -f docker-compose.yml up -d
+    
+```
+
+
 ## Accessing Kibana
 Kibana is a web application that you access through port 5601. Go to url: http://localhost:5601 with login information:
 ```
 Username: elastic
-Password: MyPwd123
+Password: elastic
 ```
 ![Kibana service](image/kibana.png)
 
@@ -87,3 +97,12 @@ GET /logstash-*/_search?q=*&sort=@timestamp:desc&pretty
 - [Sending Docker Logs to ElasticSearch and Kibana with FileBeat](https://www.sarulabs.com/post/5/2019-08-12/sending-docker-logs-to-elasticsearch-and-kibana-with-filebeat.html)
 
 
+
+## Command helper
+```
+# Remove all container
+> docker rm $(docker ps -a -q)
+
+# Stop all container
+> docker stop $(docker ps -a -q)
+```
