@@ -11,6 +11,10 @@ services:
       - ${KIBANA_PORT}:5601
     networks:
       - esnet
+    logging:
+      options:
+        max-size: "1g"
+        max-file: "5"
 
   # ES01
   es01:

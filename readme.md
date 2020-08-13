@@ -30,7 +30,7 @@ By default, the stack exposes the following ports:
 > docker-compose down
 ```
 
-**Note**: If you using Ubuntu/Linux, you may need to change the permissions of folder:
+**Note important**: If you using Ubuntu/Linux, you may need to change the permissions of folder:
 
 ```sh
 sudo chmod -R 777 /path_to_project/data
