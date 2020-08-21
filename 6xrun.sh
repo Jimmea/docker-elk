@@ -1,5 +1,5 @@
 echo "1/Upgrade docker" &&
-docker-compose -f docker-compose-v.yml up -d
+docker-compose -f docker-compose.yml up -d
 echo "2/ Check version" &&
 curl localhost:9200
 echo "3/ Check index" &&
