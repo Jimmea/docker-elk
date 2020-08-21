@@ -7,3 +7,4 @@ xpack.security.enabled: false
 #xpack.watcher.enabled: false
 #xpack.ml.enabled: false
 xpack.monitoring.collection.enabled: true
+discovery.zen.ping.multicast.enabled: false

@@ -116,5 +116,5 @@ elasticsearch.ssl.verificationMode: none
 # Specifies locale to be used for all localizable strings, dates and number formats.
 #i18n.locale: "en"
 
-xpack.security.enabled: true
+xpack.security.enabled: false
 xpack.monitoring.ui.container.elasticsearch.enabled: true
