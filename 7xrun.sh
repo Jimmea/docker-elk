@@ -1,6 +1,6 @@
 echo "1/Up" &&
 docker-compose build
-docker-compose -f docker-compose.yml up -d
+docker-compose -f docker-compose7x.yml up -d
 echo "2/ Check version" &&
 curl localhost:9200
 echo "3/ Check index" &&

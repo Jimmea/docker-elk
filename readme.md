@@ -13,16 +13,15 @@ By default, the stack exposes the following ports:
 - file beat
 
 ## Setup
-
 ```sh
 > git clone git@github.com:Jimmea/docker-elastic-7x.git /path_to_project
 
 > cd /path_to_project
 
-# Run 6x
+# Run ES6x
 > sh 6xrun.sh
 
-# Run 7x
+# Run ES7x
 > sh 7xrun.sh
 
 > docker-compose logs -f
@@ -38,7 +37,7 @@ sudo chmod -R 777 /path_to_project/data
 
 **Copy config elasticsearch.yaml from container to host|local**
 ```
-docker cp [name_container]:/usr/share/elasticsearch/config/elasticsearch.yml source/elasticsearch.yml 
+docker cp [name_container]:/usr/share/elasticsearch/config/elasticsearch.yml source/elasticsearch.yml
 ```
 
 ## Upgrade or Down
@@ -48,6 +47,45 @@ docker cp [name_container]:/usr/share/elasticsearch/config/elasticsearch.yml sou
     
 ```
 
+## Securing Kibana with nginx basic auth
+If you dont have subscription for elasticsearch there is a better chance your elastic kibana setup for web development is suspectable to attacks with advent of shodan and ransomware its quiet easy these days some b
+
+
+Syntax: Add service to `docker-compose.yaml`
+```
+nginx:
+    image: quay.io/dtan4/nginx-basic-auth-proxy:latest
+    ports:
+      - 8080:80
+      - 8090:8090
+    environment:
+      - BASIC_AUTH_USERNAME
+      - BASIC_AUTH_PASSWORD
+      - PROXY_PASS=http://kibana:5601/
+    networks: 
+      - kibana
+```
+#### Environment variables
+
+Now next steps are to configure user name and pass by creating `.env` file in same directory with following contents.  
+
+|Key|Description|
+|---|---|
+|`BASIC_AUTH_USERNAME`|Basic auth username|
+|`BASIC_AUTH_PASSWORD`|Basic auth password|
+
+> After everything is up and running visit http://localhost:8080 to access kibana .
+
+#### Endpoint for monitoring
+:8090/nginx_status returns the metrics of Nginx.
+```
+$ curl localhost:8090/nginx_status
+Active connections: 1
+server accepts handled requests
+ 8 8 8
+Reading: 0 Writing: 1 Waiting: 0
+
+```
 
 ## Accessing Kibana
 Kibana is a web application that you access through port 5601. Go to url: http://localhost:5601 with login information:
@@ -64,26 +102,8 @@ Password: elastic
 ## Issue Note
 - When memory host contain volumn low. Docker kibana automatically down.
 
-
 ## Exploring Your Cluster
 Using cURL in the [Console](http://localhost:5601/app/kibana#/dev_tools/console?_g=()) to:
-#### Cluster Health
-
-```
-GET /_cat/health?v
-```
-
-#### List All Indices
-
-```
-GET /_cat/indices?v
-```
-
-#### Exploring Logstash Data
-
-```
-GET /logstash-*/_search?q=*&sort=@timestamp:desc&pretty
-```
 
 ## References:
 - [Elasticsearch start docker](https://www.elastic.co/guide/en/elastic-stack-get-started/current/get-started-docker.html)
@@ -92,17 +112,6 @@ GET /logstash-*/_search?q=*&sort=@timestamp:desc&pretty
 - [Logstash Document](https://www.elastic.co/guide/en/logstash/current/index.html)
 - [Install Elasticsearch with Docker](https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html)
 - [The Search API](https://www.elastic.co/guide/en/elasticsearch/reference/current/_the_search_api.html)
-
-
 - [Sending Docker Logs to ElasticSearch and Kibana with FileBeat](https://www.sarulabs.com/post/5/2019-08-12/sending-docker-logs-to-elasticsearch-and-kibana-with-filebeat.html)
-
-
-
-## Command helper
-```
-# Remove all container
-> docker rm $(docker ps -a -q)
-
-# Stop all container
-> docker stop $(docker ps -a -q)
-```
+- [Authenticate kibana with nginx](https://documentation.wazuh.com/3.7/installation-guide/optional-configurations/kibana_ssl.html)
+- [Authenticate kibana tutorial](http://codingfundas.com/setting-up-elasticsearch-6-8-with-kibana-and-x-pack-security-enabled/index.html)
