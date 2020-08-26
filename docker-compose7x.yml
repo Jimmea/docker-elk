@@ -3,10 +3,9 @@ services:
   # Kibana
   kibana:
     image: docker.elastic.co/kibana/kibana:${KIBANA_VERSION}
-    restart: 'always'
+    #restart: 'always'
     volumes:
       - ./bin/kibana/kibana${KIBANA_VERSION}/kibana.yml:/usr/share/kibana/config/kibana.yml
-      - /data_host/kibana/log:/var/log/kibana
     ports:
       - ${KIBANA_PORT}:5601
     networks:
@@ -22,7 +21,7 @@ services:
       context: ./bin/elastic/elastic${ES_VERSION}
       dockerfile: Dockerfile
     image: elastic01:${ES_VERSION}
-    restart: 'always'
+    #restart: 'always'
     environment:
       - cluster.name=docker-cluster
       - cluster.initial_master_nodes=es01,es02,es03
@@ -42,7 +41,7 @@ services:
         soft: 65536
         hard: 65536
     volumes:
-      - /data_host/esdata01:/usr/share/elasticsearch/data
+      - ./data-volumns/esdata01:/usr/share/elasticsearch/data
     ports:
       - ${ES_PORT}:9200
     networks:
@@ -54,7 +53,7 @@ services:
       context: ./bin/elastic/elastic${ES_VERSION}
       dockerfile: Dockerfile
     image: elastic02:${ES_VERSION}
-    restart: 'always'
+    #restart: 'always'
     environment:
       - cluster.name=docker-cluster
       - cluster.initial_master_nodes=es01,es02,es03
@@ -74,7 +73,7 @@ services:
         soft: 65536
         hard: 65536
     volumes:
-      - /data_host/esdata02:/usr/share/elasticsearch/data
+      - ./data-volumns/esdata02:/usr/share/elasticsearch/data
     ports:
       - ${ES_PORT1}:9200
     networks:
@@ -86,7 +85,7 @@ services:
       context: ./bin/elastic/elastic${ES_VERSION}
       dockerfile: Dockerfile
     image: elastic03:${ES_VERSION}
-    restart: 'always'
+    #restart: 'always'
     environment:
       - cluster.name=docker-cluster
       - cluster.initial_master_nodes=es01,es02,es03
@@ -106,43 +105,38 @@ services:
         soft: 65536
         hard: 65536
     volumes:
-      - /data_host/esdata03:/usr/share/elasticsearch/data
+      - ./data-volumns/esdata03:/usr/share/elasticsearch/data
     ports:
       - ${ES_PORT2}:9200
-    networks:
-      - esnet
-
-  # headPlugin
-  headPlugin:
-    image: 'mobz/elasticsearch-head:5'
-    ports:
-      - 9100:9100
     networks:
       - esnet
 
   # Elasticsearch HQ
   elasticsearchHq:
     image: elastichq/elasticsearch-hq
-    restart: 'always'
+    #restart: 'always'
     ports:
       - ${ES_HQ}:5000
     networks:
       - esnet
 
   # Log stash
-  logstash:
-    image: docker.elastic.co/logstash/logstash:${LOGSTASH_VERSION}
-    volumes:
-      - ./bin/logstash/logtash${LOGSTASH_VERSION}/logstash.conf/:/usr/share/logstash/pipeline/logstash.conf
-      - ./bin/logstash/logtash${LOGSTASH_VERSION}/logstash.yml/:/usr/share/logstash/config/logstash.yml
-    networks:
-      - esnet
+#  logstash:
+#    image: docker.elastic.co/logstash/logstash:${LOGSTASH_VERSION}
+#    volumes:
+#      - ./bin/logstash/logtash${LOGSTASH_VERSION}/logstash.conf/:/usr/share/logstash/pipeline/logstash.conf
+#      - ./bin/logstash/logtash${LOGSTASH_VERSION}/logstash.yml/:/usr/share/logstash/config/logstash.yml
+#    networks:
+#      - esnet
 
 volumes:
   esdata01:
     driver: local
   esdata02:
     driver: local
+  esdata03:
+    driver: local
 
 networks:
   esnet:
+    driver: bridge
