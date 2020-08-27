@@ -1,4 +1,4 @@
-cluster.name: "docker-cluster"
+cluster.name: "docker-cluster-7x"
 network.host: 0.0.0.0
 
 #xpack.license.self_generated.type: trial

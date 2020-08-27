@@ -26,7 +26,7 @@ services:
       - xpack.security.enabled=true
     volumes:
       - ./bin/kibana/kibana${KIBANA_VERSION}/kibana.yml:/usr/share/kibana/config/kibana.yml
-      - /data_host6x/kibana/log:/var/log/kibana
+      - ${LIB_VOLUMN}/kibana/log:/var/log/kibana
     ports:
       - ${KIBANA_PORT}:5601
     networks:
@@ -59,9 +59,8 @@ services:
         soft: 65536
         hard: 65536
     volumes:
-      - /data_host6x/esdata1:/usr/share/elasticsearch/data
+      - ${ES_DATA_VOLUMN}/esdata1:/usr/share/elasticsearch/data
       - ./bin/elastic/elastic${ES_VERSION}/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
-      - ./elastic-certificates.p12:/usr/share/elasticsearch/config/elastic-certificates.p12
     ports:
       - ${ES_PORT}:9200
     networks:
@@ -89,7 +88,7 @@ services:
         soft: 65536
         hard: 65536
     volumes:
-      - /data_host6x/esdata2:/usr/share/elasticsearch/data
+      - ${ES_DATA_VOLUMN}/esdata2:/usr/share/elasticsearch/data
     networks:
       - esnet
 
@@ -115,27 +114,19 @@ services:
         soft: 65536
         hard: 65536
     volumes:
-      - /data_host6x/esdata3:/usr/share/elasticsearch/data
+      - ${ES_DATA_VOLUMN}/esdata3:/usr/share/elasticsearch/data
     networks:
       - esnet
 
-#  # headPlugin
-#  headPlugin:
-#    image: 'mobz/elasticsearch-head:5'
-#    ports:
-#      - 9100:9100
-#    networks:
-#      - esnet
-#
-#  # Elasticsearch HQ
-#  elasticsearchHq:
-#    image: elastichq/elasticsearch-hq
-#    ports:
-#      - ${ES_HQ}:5000
-#    networks:
-#      - esnet
-#
-#  #Log stash
+  # Elasticsearch HQ
+  elasticsearchHq:
+    image: elastichq/elasticsearch-hq
+    ports:
+      - ${ES_HQ}:5000
+    networks:
+      - esnet
+
+  #Log stash
 #  logstash:
 #    image: docker.elastic.co/logstash/logstash:${LOGSTASH_VERSION}
 #    volumes:
