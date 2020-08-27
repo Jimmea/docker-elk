@@ -58,7 +58,7 @@ services:
     environment:
       - cluster.name=docker-cluster
       - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
       - http.cors.enabled=true
       - http.cors.allow-origin=*
       - discovery.zen.minimum_master_nodes=2
@@ -88,7 +88,7 @@ services:
     environment:
       - cluster.name=docker-cluster
       - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
       - "discovery.zen.ping.unicast.hosts=es01"
       - http.cors.enabled=true
       - http.cors.allow-origin=*
@@ -114,7 +114,7 @@ services:
     environment:
     - cluster.name=docker-cluster
     - bootstrap.memory_lock=true
-    - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
     - "discovery.zen.ping.unicast.hosts=es01"
     - http.cors.enabled=true
     - http.cors.allow-origin=*
