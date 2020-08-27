@@ -2,3 +2,4 @@
 /libs/*
 /data-volumn-7x/*
 .idea
+.env
