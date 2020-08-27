@@ -1,7 +1,6 @@
 version: '3'
 services:
-
-  # Nginx
+  # Nginx proxy
   nginx:
     image: quay.io/dtan4/nginx-basic-auth-proxy:latest
     ports:
@@ -11,6 +10,20 @@ services:
       - BASIC_AUTH_USERNAME
       - BASIC_AUTH_PASSWORD
       - PROXY_PASS=http://kibana:5601/
+    networks:
+      - esnet
+
+  # Nginx proxy
+  nginx2:
+    image: quay.io/dtan4/nginx-basic-auth-proxy:latest
+    container_name: nginxAuthEsHq
+    ports:
+      - 8081:80
+      - 8091:8090
+    environment:
+      - BASIC_AUTH_USERNAME
+      - BASIC_AUTH_PASSWORD
+      - PROXY_PASS=http://elasticsearchHq:5000/
     networks:
       - esnet
 
@@ -34,7 +47,7 @@ services:
     logging:
       options:
         max-size: "50m"
-        max-file: "3"
+        max-file: "5"
 
   # ES01
   es01:
@@ -140,6 +153,9 @@ volumes:
     driver: local
   esdata02:
     driver: local
+  esdata3:
+    driver: local
 
 networks:
   esnet:
+    driver: bridge
