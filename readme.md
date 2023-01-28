@@ -18,13 +18,14 @@ By default, the stack exposes the following ports:
 
 > cd /path_to_project
 
-# Run ES6x
-> sh 6xrun.sh
+# Cài đặt các version 6x
+> sh install_6x.sh
 
-# Run ES7x
-> sh 7xrun.sh
+# Cài đặt các version 7x
+> sh install_7x.sh
 
 > docker-compose logs -f
+
 
 > docker-compose down
 ```
@@ -46,6 +47,7 @@ docker cp [name_container]:/usr/share/elasticsearch/config/elasticsearch.yml sou
     docker-compose -f docker-compose.yml up -d
     
 ```
+
 
 ## Securing Kibana with nginx basic auth
 If you dont have subscription for elasticsearch there is a better chance your elastic kibana setup for web development is suspectable to attacks with advent of shodan and ransomware its quiet easy these days some b

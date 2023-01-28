@@ -117,4 +117,4 @@ elasticsearch.ssl.verificationMode: none
 #i18n.locale: "en"
 
 xpack.security.enabled: false
-xpack.monitoring.ui.container.elasticsearch.enabled: true
+xpack.monitoring.ui.container.elasticsearch.enabled: false

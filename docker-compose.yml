@@ -1,124 +1,44 @@
 version: '3'
 services:
-  # Nginx proxy
-  nginx:
-    image: quay.io/dtan4/nginx-basic-auth-proxy:latest
-    ports:
-      - 8080:80
-      - 8090:8090
-    environment:
-      - BASIC_AUTH_USERNAME
-      - BASIC_AUTH_PASSWORD
-      - PROXY_PASS=http://kibana:5601/
-    networks:
-      - esnet
-
-  # Nginx proxy
-  nginx2:
-    image: quay.io/dtan4/nginx-basic-auth-proxy:latest
-    container_name: nginxAuthEsHq
-    ports:
-      - 8081:80
-      - 8091:8090
-    environment:
-      - BASIC_AUTH_USERNAME
-      - BASIC_AUTH_PASSWORD
-      - PROXY_PASS=http://elasticsearchHq:5000/
-    networks:
-      - esnet
-
   # Kibana
   kibana:
     image: docker.elastic.co/kibana/kibana:${KIBANA_VERSION}
+    restart: 'always'
     environment:
-      - "KIBANA_PWD=root_kibana"
-      - "SERVER_NAME=kibana.local"
-      - "ELASTICSEARCH_URL=http://elastic:elastic@es01:9200"
-      - "ELASTICSEARCH_USERNAME=elastic"
-      - "ELASTICSEARCH_PASSWORD=elastic"
-      - xpack.security.enabled=true
+    - "KIBANA_PWD=root_kibana"
+    - "SERVER_NAME=kibana.local"
+    - "ELASTICSEARCH_URL=http://elastic:elastic@es01:9200"
+    - "ELASTICSEARCH_USERNAME=elastic"
+    - "ELASTICSEARCH_PASSWORD=elastic"
+    - xpack.security.enabled=true
     volumes:
-      - ./bin/kibana/kibana${KIBANA_VERSION}/kibana.yml:/usr/share/kibana/config/kibana.yml
-      - ${LIB_VOLUMN}/kibana/log:/var/log/kibana
+    - ./bin/kibana/kibana${KIBANA_VERSION}/kibana.yml:/usr/share/kibana/config/kibana.yml
+    - ${LIB_VOLUMN}/kibana/log:/var/log/kibana
     ports:
-      - ${KIBANA_PORT}:5601
+    - ${KIBANA_PORT}:5601
     networks:
-      - esnet
+    - elastic
     logging:
       options:
         max-size: "50m"
         max-file: "5"
 
-  # ES01
+  # Node es01
   es01:
-    build:
-      context: ./bin/elastic/elastic${ES_VERSION}
-      dockerfile: Dockerfile
-    image: elastic01:${ES_VERSION}
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ES_VERSION}
+    container_name: es01
+    restart: 'always'
     environment:
-      - cluster.name=docker-cluster
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
-      - http.cors.enabled=true
-      - http.cors.allow-origin=*
-      - discovery.zen.minimum_master_nodes=2
-      - ELASTIC_USERNAME="elastic"
-      - ELASTIC_PASSWORD="elastic"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-      nofile:
-        soft: 65536
-        hard: 65536
-    volumes:
-      - ${ES_DATA_VOLUMN}/esdata1:/usr/share/elasticsearch/data
-      - ./bin/elastic/elastic${ES_VERSION}/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
-    ports:
-      - ${ES_PORT}:9200
-    networks:
-      - esnet
-
-  # ES02
-  es02:
-    build:
-      context: ./bin/elastic/elastic${ES_VERSION}
-      dockerfile: Dockerfile
-    image: elastic02:${ES_VERSION}
-    environment:
-      - cluster.name=docker-cluster
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
-      - "discovery.zen.ping.unicast.hosts=es01"
-      - http.cors.enabled=true
-      - http.cors.allow-origin=*
-      - discovery.zen.minimum_master_nodes=2
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-      nofile:
-        soft: 65536
-        hard: 65536
-    volumes:
-      - ${ES_DATA_VOLUMN}/esdata2:/usr/share/elasticsearch/data
-    networks:
-      - esnet
-
-  # ES03
-  es03:
-    build:
-      context: ./bin/elastic/elastic${ES_VERSION}
-      dockerfile: Dockerfile
-    image: elastic03:${ES_VERSION}
-    environment:
-    - cluster.name=docker-cluster
+    - node.name=es01
+    - cluster.name=es-docker-cluster
+    - discovery.seed_hosts=es02,es03
+    - cluster.initial_master_nodes=es01,es02,es03
     - bootstrap.memory_lock=true
-    - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
-    - "discovery.zen.ping.unicast.hosts=es01"
+    - "ES_JAVA_OPTS=-Xms${MEMORY_HEAP_SIZE} -Xmx${MEMORY_HEAP_SIZE}"
     - http.cors.enabled=true
     - http.cors.allow-origin=*
-    - discovery.zen.minimum_master_nodes=2
+    - "ELASTIC_USERNAME=elastic"
+    - "ELASTIC_PASSWORD=elastic"
     ulimits:
       memlock:
         soft: -1
@@ -127,35 +47,75 @@ services:
         soft: 65536
         hard: 65536
     volumes:
-      - ${ES_DATA_VOLUMN}/esdata3:/usr/share/elasticsearch/data
-    networks:
-      - esnet
-
-  # Elasticsearch HQ
-  elasticsearchHq:
-    image: elastichq/elasticsearch-hq
+    - ${ES7x_DATA_VOLUMN}/data01:/usr/share/elasticsearch/data
     ports:
-      - ${ES_HQ}:5000
+    - 9200:9200
     networks:
-      - esnet
+    - elastic
+  # Node es02
+  es02:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ES_VERSION}
+    container_name: es02
+    restart: 'always'
+    environment:
+    - node.name=es02
+    - cluster.name=es-docker-cluster
+    - discovery.seed_hosts=es01,es03
+    - cluster.initial_master_nodes=es01,es02,es03
+    - bootstrap.memory_lock=true
+    - "ES_JAVA_OPTS=-Xms${MEMORY_HEAP_SIZE} -Xmx${MEMORY_HEAP_SIZE}"
+    - http.cors.enabled=true
+    - http.cors.allow-origin=*
+    - "ELASTIC_USERNAME=elastic"
+    - "ELASTIC_PASSWORD=elastic"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+    - ${ES7x_DATA_VOLUMN}/data02:/usr/share/elasticsearch/data
+    networks:
+    - elastic
 
-  #Log stash
-#  logstash:
-#    image: docker.elastic.co/logstash/logstash:${LOGSTASH_VERSION}
-#    volumes:
-#      - ./bin/logstash/logtash${LOGSTASH_VERSION}/logstash.conf/:/usr/share/logstash/pipeline/logstash.conf
-#      - ./bin/logstash/logtash${LOGSTASH_VERSION}/logstash.yml/:/usr/share/logstash/config/logstash.yml
-#    networks:
-#      - esnet
+  # Node es03
+  es03:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ES_VERSION}
+    container_name: es03
+    restart: 'always'
+    environment:
+    - node.name=es03
+    - cluster.name=es-docker-cluster
+    - discovery.seed_hosts=es01,es02
+    - cluster.initial_master_nodes=es01,es02,es03
+    - bootstrap.memory_lock=true
+    - "ES_JAVA_OPTS=-Xms${MEMORY_HEAP_SIZE} -Xmx${MEMORY_HEAP_SIZE}"
+    - http.cors.enabled=true
+    - http.cors.allow-origin=*
+    - "ELASTIC_USERNAME=elastic"
+    - "ELASTIC_PASSWORD=elastic"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+    - ${ES7x_DATA_VOLUMN}/data03:/usr/share/elasticsearch/data
+    networks:
+    - elastic
 
 volumes:
-  esdata01:
+  data01:
     driver: local
-  esdata02:
+  data02:
     driver: local
-  esdata3:
+  data03:
     driver: local
 
 networks:
-  esnet:
+  elastic:
     driver: bridge

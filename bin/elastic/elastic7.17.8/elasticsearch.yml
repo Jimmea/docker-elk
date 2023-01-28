@@ -1,4 +1,4 @@
-cluster.name: "docker-cluster-7x"
+#cluster.name: "docker-cluster-7x"
 network.host: 0.0.0.0
 
 #xpack.license.self_generated.type: trial
@@ -6,4 +6,4 @@ network.host: 0.0.0.0
 #xpack.security.enabled: true
 #xpack.watcher.enabled: false
 #xpack.ml.enabled: false
-xpack.monitoring.collection.enabled: true
+#xpack.monitoring.collection.enabled: true

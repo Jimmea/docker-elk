@@ -1,4 +1,4 @@
-FROM docker.elastic.co/elasticsearch/elasticsearch:7.2.0
+FROM docker.elastic.co/elasticsearch/elasticsearch:7.17.8
 # RUN elasticsearch-plugin remove analysis-kuromoji
 # RUN elasticsearch-plugin remove analysis-icu
 
